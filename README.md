@@ -11,8 +11,5 @@ In order to view the project in the browser, you can download, install and run [
 #### Documentation
 [Udacity](https://eu.udacity.com/) - great courses
 
-[IndexedDB Promised](https://github.com/jakearchibald/idb) - IndexedDB, but with promises
-
-
 #### License 
 The contents of this repository are covered under the [MIT License](https://choosealicense.com/licenses/mit/).
