@@ -1,5 +1,5 @@
 let restaurant;
-var map;
+let map;
 
 /* Added for working offline */
 document.addEventListener("DOMContentLoaded", event => {
@@ -106,10 +106,14 @@ fillRestaurantHoursHTML = (
 fillReviewsHTML = (reviews = self.restaurant.reviews) => {
   const container = document.getElementById("reviews-container");
   const title = document.createElement("h4");
+  title.id="review_title";
   /* ACCESSIBILITY SETUP */
-  title.setAttribute("tabindex", "0");
+  
   /* *** */
   title.innerHTML = "Reviews";
+  if(document.contains(document.getElementById("review_title"))){
+    document.getElementById("review_title").remove();
+  }
   container.appendChild(title);
 
   if (!reviews) {

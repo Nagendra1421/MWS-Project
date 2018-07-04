@@ -216,10 +216,19 @@ createRestaurantHTML = restaurant => {
       rest_rating.innerHTML=`&#9733; ${res.toFixed(1)}`;;
    });
   container_div.append(rest_rating);
+  const rest_container=document.createElement("div");
+  rest_container.className="rest_container";
+  li.append(rest_container);
+  const rest_icon=document.createElement("img");
+  rest_icon.className="restaurant-icon";
+  rest_icon.src="./img/restaurant.svg";
+  rest_container.append(rest_icon);
   const name = document.createElement("h3");
+  name.className="rest_name";
   name.innerHTML = restaurant.name;
-  li.append(name);
+  rest_container.append(name);
   
+
   const neighborhood = document.createElement("p");
   neighborhood.innerHTML = restaurant.neighborhood;
   li.append(neighborhood);

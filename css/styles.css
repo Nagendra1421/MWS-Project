@@ -289,7 +289,6 @@ nav h1 a:hover {
   margin: 0;
   max-width: 100%;
   min-width: 100%;
-
 }
  .container .restaurant-rating{
   position: absolute;
@@ -299,15 +298,25 @@ nav h1 a:hover {
   background-color: darkred;
   color: #fff;
 }
-
-#restaurants-list li h3 {
+#restaurants-list li .rest_container{
+  width: 100%px;
+  display: inherit;
+  padding:0 5px;
+  margin-top: 10px;
+}
+#restaurants-list .restaurant-icon{
+  width:20px;
+  height: 20px;
+  margin-left: 10px;
+}
+.rest_name{
   color: #b34f00;
+  margin-left: 5px;
   letter-spacing: 0;
   line-height: 1.2em;
-  margin: 20px 0 10px;
   text-transform: uppercase;
-  padding: 0 5px;
 }
+
 
 #restaurants-list li p {
   margin: 0;
