@@ -195,21 +195,22 @@ createRestaurantHTML = restaurant => {
   image.setAttribute("data-src", imageUrlForRestaurant(restaurant, 128));
   container_div.append(image);
   li.appendChild(container_div);
-  const rest_rating=document.createElement("h5");
-  rest_rating.className="restaurant-rating";
-  var res;
-  DBHelper.fetchRestaurantById(restaurant.id, (error, restaurant) => {
-       var avergae_rating=0;
-       var count=0;
-       const reviews=restaurant.reviews;
-       reviews.forEach(review=>{
-         avergae_rating+=review.rating;
-         count++;
-       });
-       res=avergae_rating/count;
-      rest_rating.innerHTML=`&#9733; ${res.toFixed(1)}`;
-   });
-  container_div.append(rest_rating);
+  // const rest_rating=document.createElement("h5");
+  // rest_rating.className="restaurant-rating";
+  // rest_rating.innerHTML="";
+  // var res;
+  // DBHelper.fetchRestaurantById(restaurant.id, (error, restaurant) => {
+  //      var avergae_rating=0;
+  //      var count=0;
+  //      const reviews=restaurant.reviews;
+  //      reviews.forEach(review=>{
+  //        avergae_rating+=review.rating;
+  //        count++;
+  //      });
+  //      res=avergae_rating/count;
+  //     rest_rating.innerHTML=`&#9733; ${res.toFixed(1)}`;
+  //  });
+  // container_div.append(rest_rating);
   const rest_container=document.createElement("div");
   rest_container.className="rest_container";
   li.append(rest_container);
