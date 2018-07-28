@@ -1,26 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <title>Restaurant Reviews</title>
+  <meta charset="utf-8"
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" type="image/x-icon" href="img/rest_icon.ico">
-  <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="yes" name="mobile-web-app-capable" />
+  <title>Restaurant Reviews</title>
+  <meta content="yes" name="apple-touch-fullscreen" />
+  <meta content="Nagendra Singh" name="author" />
+  <meta content="Restaurant reviews webapp." name="description" />
+  <link rel="manifest" href="site.webmanifest" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
   <link rel="stylesheet" href="css/styles.css">
-  
+  <meta name="apple-mobile-web-app-title" content="Restaurant reviews" />
+  <meta name="application-name" content="Restaurant reviews" />
+  <link rel="preconnect" href="http://localhost:1337">
+  <meta name="theme-color" content="orange" />
+  <script>
+   ! function (e) {
+        var t = function (t, n) {
+            "use strict";
+            var o = e.document.getElementsByTagName("script")[0],
+                r = e.document.createElement("script");
+            return r.src = t, r.async = !0, o.parentNode.insertBefore(r, o), n && "function" == typeof n && (r.onload = n), r
+        };
+        "undefined" != typeof module ? module.exports = t : e.loadJS = t
+    }("undefined" != typeof global ? global : this);
+</script>
 </head>
-
+</html>
 <body>
   <header>
     <nav>
-      
       <h1>
         <img src="img/rest_icon.svg" alt="Logo"/>
         <a href="/">Restaurant Reviews</a></h1>
     </nav>
   </header>
-
+  
   <main id="maincontent">
     <section id="map-container-index" aria-label="google map">
       <div id="map" role="application"></div>
@@ -28,26 +48,50 @@
     <section>
       <div class="filter-options">
         <h2><img src="img/filter-results-button.svg"alt="Filter Icon">Filter Results</h2>
-        <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()">
+        <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()" aria-label="neighborhoods">
           <option value="all">All Neighborhoods</option>
         </select>
-        <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()">
+        <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()" aria-label="cuisines">
           <option value="all">All Cuisines</option>
         </select>
       </div>
       <ul id="restaurants-list"></ul>
     </section>
   </main>
-
-  <script type="application/javascript" charset="utf-8" src="js/dbhelper.js"></script>
-  <script type="application/javascript" charset="utf-8" src="js/main.js"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key={YOUR_MAPS_API_KEY}&libraries=places&callback=initMap"></script> 
+ <script type="application/javascript" charset="utf-8" src="js/dbhelper.js"></script>
+ <script type="application/javascript" charset="utf-8" src="js/helper.js"></script>
+ <script async defer type="application/javascript" charset="utf-8" src="js/lib/idb.js"></script>
+ <script type="application/javascript" charset="utf-8" src="js/lazysizes.min.js"></script>
+ <script type="application/javascript" charset="utf-8" src="js/main.js"></script>
+ <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBKJo_l4-e15tk1TOXCGsE_c1Xq6DcLgEE&libraries=places&callback=initMap"></script>
+ <script>
+   window.initMap = () => {
+    let loc = {
+      lat: 40.722216,
+      lng: -73.987501
+    };
+    self.map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 12,
+      center: loc,
+      scrollwheel: false
+    });
+    
+  };
+ </script>
+  <noscript>
+    <div class="c-no-script">
+        <div class="c-no-script-message">
+            Today,
+            <strong>JavaScript</strong> is
+            <a href="https://www.google.fr/search?q=javascript+is+awesome" title="Search Google to find out why!" target="_blank">awesome</a>. Enable it, please, and enjoy what we bring you with it :)
+        </div>
+    </div>
+</noscript>
 
 
   <footer id="footer">
-    Copyright (c) 2017 <a href="/"><strong>Restaurant Reviews</strong></a> All Rights Reserved.
+    Copyright (c) 2017 <a href="/"><b>Restaurant Reviews</b></a> All Rights Reserved.
   </footer>
 
 </body>
 
-</html>

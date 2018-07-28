@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", event => {
   /* Added for working offline */
   updateRestaurants();
 });
-
 /**
  * Fetch all neighborhoods and set their HTML.
  */
@@ -111,7 +110,6 @@ updateRestaurants = () => {
     } else {
       cIndex = localStorage.getItem("cuisIndex");
       cuisine = localStorage.getItem("cuisine");
-      console.log(cSelect);
     }
 
     if (nIndex >= 0) {
@@ -182,23 +180,19 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
   });
   addMarkersToMap();
 };
-function fetchRestaurantRating(id){
-  
-}
 /**
  * Create restaurant HTML.
  */
 createRestaurantHTML = restaurant => {
-  
   const li = document.createElement("li");
   li.setAttribute("aria-label", "restaurant details");
   const container_div=document.createElement("div");
   container_div.className="container";
- 
   const image = document.createElement("img");
-  image.setAttribute("alt", `${restaurant.name}'s restaurant photo`);
-  image.className = "restaurant-img";
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.alt = `${restaurant.name} restaurant, ${restaurant.shortDesc}`;
+  image.className = "lazyload restaurant-img";
+  image.src = imageUrlForRestaurant(restaurant,128,true);
+  image.setAttribute("data-src", imageUrlForRestaurant(restaurant, 128));
   container_div.append(image);
   li.appendChild(container_div);
   const rest_rating=document.createElement("h5");
@@ -213,7 +207,7 @@ createRestaurantHTML = restaurant => {
          count++;
        });
        res=avergae_rating/count;
-      rest_rating.innerHTML=`&#9733; ${res.toFixed(1)}`;;
+      rest_rating.innerHTML=`&#9733; ${res.toFixed(1)}`;
    });
   container_div.append(rest_rating);
   const rest_container=document.createElement("div");
@@ -222,6 +216,7 @@ createRestaurantHTML = restaurant => {
   const rest_icon=document.createElement("img");
   rest_icon.className="restaurant-icon";
   rest_icon.src="./img/restaurant.svg";
+  rest_icon.alt="rest_icon";
   rest_container.append(rest_icon);
   const name = document.createElement("h3");
   name.className="rest_name";
@@ -261,6 +256,7 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     });
     self.markers.push(marker);
   });
+
 };
 
 function storageAvailable(type) {

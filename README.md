@@ -6,7 +6,10 @@ The goal: A **responsive** web app that functions on any device or screen size. 
 The tool: Mobile Web Specialist Nanodegree Program from [Udacity](https://www.udacity.com/course/mobile-web-specialist-nanodegree--nd024)
 
 #### Running the project
-In order to view the project in the browser, you can download, install and run [lite-server](https://www.npmjs.com/package/lite-server) and then navigate to http://localhost:{YOUR_PORT_NUMBER}/. If running on Visual studio, you can download live web server plugin. 
+In order to view the project in the browser:
+1. Clone and install server from here https://github.com/udacity/mws-restaurant-stage-2.
+2. Run server
+3. In the project, from console run Python -m SimpleHTTPServer 8000
 
 #### Documentation
 [Udacity](https://eu.udacity.com/) - great courses

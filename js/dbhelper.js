@@ -7,43 +7,79 @@ class DBHelper {
    * Database URL.
    * Change this to restaurants.json file location on your server.
    */
+   static openOfflineIndexDB() {
+     if(!navigator.serviceWorker){
+       return Promise.resolve();
+     }
+     return  idb.open('restaurant-reviews', 1, (upgradeDb) => {
+       let store = upgradeDb.createObjectStore('restaurants', {
+         keyPath: 'id'
+       });
+       store.createIndex('by-id', 'id');
+     });  
+   }
   static get DATABASE_URL() {
-    const port = 8000 // Change this to your server port
-    return `http://127.0.0.1:${port}/data/restaurants.json`;
+   // const port = 8000 // Change this to your server port
+    //return `http://127.0.0.1:${port}/data/restaurants.json`;
+    const port = 1337 // Change this to your server port
+    return `http://localhost:${port}/restaurants`;
   }
 
   /**
    * Fetch all restaurants.
    */
-  //  static fetchRestaurants(callback) {
-  //    let xhr = new XMLHttpRequest();
-  //    xhr.open('GET', DBHelper.DATABASE_URL);
-  //    xhr.onload = () => {
-  //      if (xhr.status === 200) { // Got a success response from server!
-  //        const json = JSON.parse(xhr.responseText);
-  //        const restaurants = json.restaurants;
-  //        console.log(typeof(restaurants));
-  //        callback(null, restaurants);
-  //      } else { // Oops!. Got an error from server.
-  //        const error = (`Request failed. Returned status of ${xhr.status}`);
-  //        callback(error, null);
-  //      }
-  //    };
-  //    xhr.send();
-  //  }
+  static fetchRestaurants(callback) {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', DBHelper.DATABASE_URL);
+    xhr.onload = () => {
+      if (xhr.status === 200) { // Got a success response from server!
+        const restaurants = JSON.parse(xhr.responseText);
+        DBHelper.openOfflineIndexDB().then((db) => {
+          if(!db) return;
+          let tx = db.transaction('restaurants', 'readwrite');
+          let store = tx.objectStore('restaurants');
+          restaurants.forEach((restaurant) => {
+            store.put(restaurant);
+          });     
+          return restaurants;
+        })
+        callback(null, restaurants);
+      } else { // Oops!. Got an error from server.
+        DBHelper.openOfflineIndexDB().then((db) => {
+          let tx = db.transaction('restaurants');
+          let store = tx.objectStore('restaurants');
+          return store.getAll();
+        }).then((restaurants) => {
+          callback(null, restaurants);
+        }).catch( () => {
+          const error = (`Request failed. Returned status of ${xhr.status}`);
+          callback(error, null);
+        });
+      }
+    };
+    xhr.send();
+  }
 
   /**
    * Fetch all restaurants using javascript fetch.
    */
-   static fetchRestaurants(callback){
-     fetch(DBHelper.DATABASE_URL).then(function(resp){
-       return resp.json();
-     }).then(function(jsonData){
-       callback(null,jsonData.restaurants);
-     }).catch(function(error){
-       callback(error,null);
-     });
-   }
+    // static fetchRestaurants(callback){
+    //   fetch(DBHelper.DATABASE_URL).then(function(resp){
+    //     return resp.json();
+    //   }).then(function(jsonData){
+    //     DBHelper.openOfflineIndexDB().then((db)=>{
+    //       if(!db)return;
+    //       let tx=db.transaction('restaurants','readwrite');
+    //       let store=tx.objectStore('restaurants');
+    //       jsonData.forEach((restaurant)=>{
+    //         store.put(restaurant);
+    //       });
+    //     });
+    //     callback(null,jsonData);
+    //   }).catch(function(error){
+    //     callback(error,null);
+    //   });
+    // }
 
   /**
    * Fetch a restaurant by its ID.
@@ -162,8 +198,14 @@ class DBHelper {
   /**
    * Restaurant image URL.
    */
+//  supportsWebp() {
+//     if (!self.createImageBitmap) return false;
+//     const webpData = 'data:image/webp;base64,UklGRh4AAABXRUJQVlA4TBEAAAAvAAAAAAfQ//73v/+BiOh/AAA=';
+//     const blob = await fetch(webpData).then(r => r.blob());
+//     return createImageBitmap(blob).then(() => true, () => false);
+//   }
   static imageUrlForRestaurant(restaurant) {
-    return (`/img/${restaurant.photograph}`);
+    return (`./img/${restaurant.photograph ||'10'}.jpg'}`);
   }
 
   /**
