@@ -31,19 +31,6 @@
         };
         "undefined" != typeof module ? module.exports = t : e.loadJS = t
     }("undefined" != typeof global ? global : this);
-    var supportsTouch = false;
-if ('ontouchstart' in window) {
-    //iOS & android
-    document.addEventListener('touchstart', onTouchStart, {passive: true});
-
-} else if(window.navigator.msPointerEnabled) {
-
-    // Windows
-    // To test for touch capable hardware 
-    if(navigator.msMaxTouchPoints) {
-        supportsTouch = true;
-    }
-} 
 </script>
 </head>
 
