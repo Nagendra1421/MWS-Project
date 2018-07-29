@@ -1,31 +1,58 @@
 let restaurant;
-let map;
-
+var mMap;
+const MAPBOX_API_KEY = "pk.eyJ1IjoiaXN0aWFxdWUxOCIsImEiOiJjampjbzhxYnEyM3ZlM3Z0ZWRncHVsOXEyIn0.G92w014uYkp64EiGScJH8Q";
 /* Added for working offline */
 document.addEventListener("DOMContentLoaded", event => {
-  fetchRestaurantFromURL(restaurant => {
-    fillBreadcrumb();
-  });
+  initMap();
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then(registration => console.log("SW registered", registration))
+      .catch(e => console.log("Registration failed :(", e));
+  }
 });
 /**
- * Initialize Google map, called from HTML.
+ * Initialize MapBox map, called from HTML.
  */
-window.initMap = () => {
+initMap = () => {
   fetchRestaurantFromURL((error, restaurant) => {
-    if (error) {
-      // Got an error!
+    if (error) { // Got an error!
       console.error(error);
     } else {
-      self.map = new google.maps.Map(document.getElementById("map"), {
+      self.mMap = L.map('map', {
+        center: [restaurant.latlng.lat, restaurant.latlng.lng],
         zoom: 16,
-        center: restaurant.latlng,
-        scrollwheel: false
+        scrollWheelZoom: false
       });
-      // fillBreadcrumb();
-      DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+      L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
+        mapboxToken: MAPBOX_API_KEY,
+        maxZoom: 18,
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+          '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+          'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        id: 'mapbox.streets'
+      }).addTo(mMap);
+      fillBreadcrumb();
+      DBHelper.mapMarkerForRestaurant(self.restaurant, self.mMap);
     }
   });
 };
+// window.initMap = () => {
+//   fetchRestaurantFromURL((error, restaurant) => {
+//     if (error) {
+//       // Got an error!
+//       console.error(error);
+//     } else {
+//       self.map = new google.maps.Map(document.getElementById("map"), {
+//         zoom: 16,
+//         center: restaurant.latlng,
+//         scrollwheel: false
+//       });
+//       // fillBreadcrumb();
+//       DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+//     }
+//   });
+// };
 
 /**
  * Get current restaurant from page URL.
@@ -175,12 +202,12 @@ getParameterByName = (name, url) => {
   if (!results[2]) return "";
   return decodeURIComponent(results[2].replace(/\+/g, " "));
 };
- document.addEventListener("DOMContentLoaded", event => {
-   if (navigator.serviceWorker) {
-     navigator.serviceWorker
-       .register("./sw.js")
-       .then(registration => console.log("SW registered", registration))
-       .catch(e => console.log("Registration failed :(", e));
-   }
- });
+//  document.addEventListener("DOMContentLoaded", event => {
+//    if (navigator.serviceWorker) {
+//      navigator.serviceWorker
+//        .register("./sw.js")
+//        .then(registration => console.log("SW registered", registration))
+//        .catch(e => console.log("Registration failed :(", e));
+//    }
+//  });
 

@@ -1,22 +1,28 @@
 let restaurants, neighborhoods, cuisines;
-var map;
+var mMap;
 var markers = [];
+const MAPBOX_API_KEY = "pk.eyJ1IjoiaXN0aWFxdWUxOCIsImEiOiJjampjbzhxYnEyM3ZlM3Z0ZWRncHVsOXEyIn0.G92w014uYkp64EiGScJH8Q";
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
 document.addEventListener("DOMContentLoaded", event => {
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then(registration => console.log("SW registered", registration))
+      .catch(e => console.log("Registration failed :(", e));
+  }
+  initMap();
   fetchNeighborhoods();
   fetchCuisines();
   /* Added for working offline */
-  updateRestaurants();
 });
 /**
  * Fetch all neighborhoods and set their HTML.
  */
 fetchNeighborhoods = () => {
   DBHelper.fetchNeighborhoods((error, neighborhoods) => {
-    if (error) {
-      // Got an error
+    if (error) { // Got an error
       console.error(error);
     } else {
       self.neighborhoods = neighborhoods;
@@ -29,12 +35,9 @@ fetchNeighborhoods = () => {
  * Set neighborhoods HTML.
  */
 fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
-  const select = document.getElementById("neighborhoods-select");
+  const select = document.getElementById('neighborhoods-select');
   neighborhoods.forEach(neighborhood => {
-    const option = document.createElement("option");
-    if (localStorage.getItem("neighborhood") === neighborhood) {
-      option.setAttribute("selected", "selected");
-    }
+    const option = document.createElement('option');
     option.innerHTML = neighborhood;
     option.value = neighborhood;
     select.append(option);
@@ -60,14 +63,9 @@ fetchCuisines = () => {
  * Set cuisines HTML.
  */
 fillCuisinesHTML = (cuisines = self.cuisines) => {
-  const select = document.getElementById("cuisines-select");
+  const select = document.getElementById('cuisines-select');
   cuisines.forEach(cuisine => {
-    const option = document.createElement("option");
-    /* Set the options user selected before navigating away from index.html, once he returns to it by hitting 'back' */
-    if (localStorage.getItem("cuisine") === cuisine) {
-      option.setAttribute("selected", "selected");
-      localStorage.clear();
-    }
+    const option = document.createElement('option');
     option.innerHTML = cuisine;
     option.value = cuisine;
     select.append(option);
@@ -75,75 +73,46 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
 };
 
 /**
- * Initialize Google map, called from HTML.
+ * Initialize MapBox map, called from HTML.
  */
-window.initMap = () => {
-  let loc = {
-    lat: 40.722216,
-    lng: -73.987501
-  };
-  self.map = new google.maps.Map(document.getElementById("map"), {
+initMap = () => {
+  self.mMap = L.map('map', {
+    center: [40.722216, -73.987501],
     zoom: 12,
-    center: loc,
-    scrollwheel: false
+    scrollWheelZoom: false
   });
+  L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}', {
+    mapboxToken: MAPBOX_API_KEY,
+    maxZoom: 18,
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+      '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+      'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    id: 'mapbox.streets'
+  }).addTo(mMap);
+
   updateRestaurants();
 };
-
 /**
  * Update page and map for current restaurants.
  */
 updateRestaurants = () => {
-  const cSelect = document.getElementById("cuisines-select");
-  const nSelect = document.getElementById("neighborhoods-select");
+  const cSelect = document.getElementById('cuisines-select');
+  const nSelect = document.getElementById('neighborhoods-select');
 
-  let cIndex = cSelect.selectedIndex;
-  let nIndex = nSelect.selectedIndex;
+  const cIndex = cSelect.selectedIndex;
+  const nIndex = nSelect.selectedIndex;
 
-  let cuisine, neighborhood;
-  /* Offline handling of remembering a user's selectons if they navigate away and then back to main page */
-  const localStorageAvailable = storageAvailable("localStorage");
-  if (localStorageAvailable) {
-    if (cIndex >= 0) {
-      localStorage.setItem("cuisIndex", cIndex);
-      localStorage.setItem("cuisine", cSelect[cIndex].value);
+  const cuisine = cSelect[cIndex].value;
+  const neighborhood = nSelect[nIndex].value;
+
+  DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
+    if (error) { // Got an error!
+      console.error(error);
     } else {
-      cIndex = localStorage.getItem("cuisIndex");
-      cuisine = localStorage.getItem("cuisine");
+      resetRestaurants(restaurants);
+      fillRestaurantsHTML();
     }
-
-    if (nIndex >= 0) {
-      localStorage.setItem("neighbIndex", nIndex);
-      localStorage.setItem("neighborhood", nSelect[nIndex].value);
-    } else {
-      nIndex = localStorage.getItem("neighbIndex");
-      neighborhood = localStorage.getItem("neighborhood");
-      nSelect.value = neighborhood;
-    }
-  }
-  /* If any data in localStorage, means user navigated back to main page from restaurant.html; else just use his current selection */
-  if (!cuisine) {
-    cuisine = cSelect[cIndex].value;
-  }
-  if (!neighborhood) {
-    neighborhood = nSelect[nIndex].value;
-  }
-
-  /* TODO: FIX SELECT VALUE DISPLAY;  */
-
-  DBHelper.fetchRestaurantByCuisineAndNeighborhood(
-    cuisine,
-    neighborhood,
-    (error, restaurants) => {
-      if (error) {
-        // Got an error!
-        console.error(error);
-      } else {
-        resetRestaurants(restaurants);
-        fillRestaurantsHTML();
-      }
-    }
-  );
+  })
 };
 
 /**
@@ -156,7 +125,7 @@ resetRestaurants = restaurants => {
   ul.innerHTML = "";
 
   // Remove all map markers
-  self.markers.forEach(m => m.setMap(null));
+  self.markers.forEach(m => m.remove());
   self.markers = [];
   self.restaurants = restaurants;
 };
@@ -165,16 +134,7 @@ resetRestaurants = restaurants => {
  * Create all restaurants HTML (including no-results element) and add them to the webpage.
  */
 fillRestaurantsHTML = (restaurants = self.restaurants) => {
-  const ul = document.getElementById("restaurants-list");
-  ul.setAttribute("tabindex", "0");
-  ul.setAttribute("aria-label", "restaurants list");
-  if (restaurants.length === 0) {
-    let noResults = document.createElement("h1");
-    noResults.innerHTML = "Sorry, there are no results matching your criteria.";
-    noResults.setAttribute("tabindex", "0");
-    ul.appendChild(noResults);
-    return;
-  }
+  const ul = document.getElementById('restaurants-list');
   restaurants.forEach(restaurant => {
     ul.append(createRestaurantHTML(restaurant));
   });
@@ -188,37 +148,41 @@ createRestaurantHTML = restaurant => {
   li.setAttribute("aria-label", "restaurant details");
   const container_div=document.createElement("div");
   container_div.className="container";
+
   const image = document.createElement("img");
   image.alt = `${restaurant.name} restaurant, ${restaurant.shortDesc}`;
   image.className = "lazyload restaurant-img";
-  image.src = imageUrlForRestaurant(restaurant,128,true);
-  image.setAttribute("data-src", imageUrlForRestaurant(restaurant, 128));
+  image.src = imageUrlForRestaurant(restaurant,360,true);
+  image.setAttribute("data-src", imageUrlForRestaurant(restaurant, 360));
+  image.tabIndex = 0;
   container_div.append(image);
   li.appendChild(container_div);
-  // const rest_rating=document.createElement("h5");
-  // rest_rating.className="restaurant-rating";
-  // rest_rating.innerHTML="";
-  // var res;
-  // DBHelper.fetchRestaurantById(restaurant.id, (error, restaurant) => {
-  //      var avergae_rating=0;
-  //      var count=0;
-  //      const reviews=restaurant.reviews;
-  //      reviews.forEach(review=>{
-  //        avergae_rating+=review.rating;
-  //        count++;
-  //      });
-  //      res=avergae_rating/count;
-  //     rest_rating.innerHTML=`&#9733; ${res.toFixed(1)}`;
-  //  });
-  // container_div.append(rest_rating);
+// const rest_rating=document.createElement("h5");
+//  rest_rating.className="restaurant-rating";
+//  rest_rating.innerHTML="";
+//  var res;
+//   DBHelper.fetchRestaurantById(restaurant.id, (error, restaurant) => {
+//        var average_rating=0;
+//        var count=0;
+//        const reviews=restaurant.reviews;
+//        reviews.forEach(review=>{
+//          average_rating+=parseInt(review.rating);
+//          count++;
+//        });
+//        res=average_rating/count;
+//       rest_rating.innerHTML=`&#9733; ${res.toFixed(1)}`;
+//    });
+//   container_div.append(rest_rating);
   const rest_container=document.createElement("div");
   rest_container.className="rest_container";
   li.append(rest_container);
+
   const rest_icon=document.createElement("img");
   rest_icon.className="restaurant-icon";
   rest_icon.src="./img/restaurant.svg";
-  rest_icon.alt="rest_icon";
+  rest_icon.alt="restaurant_icon";
   rest_container.append(rest_icon);
+
   const name = document.createElement("h3");
   name.className="rest_name";
   name.innerHTML = restaurant.name;
@@ -234,14 +198,12 @@ createRestaurantHTML = restaurant => {
   li.append(address);
 
   const more = document.createElement("a");
-  more.setAttribute(
-    "aria-label",
-    restaurant.name + ", " + restaurant.neighborhood
-  );
+  more.setAttribute("aria-label",restaurant.name + ", " + restaurant.neighborhood);
+  more.setAttribute('role', 'button');
+  more.setAttribute('aria-pressed', 'false');
   more.innerHTML = "View Details";
-  more.href = DBHelper.urlForRestaurant(restaurant);
+  more.href =urlForRestaurant(restaurant);
   li.append(more);
-
   return li;
 };
 
@@ -251,45 +213,26 @@ createRestaurantHTML = restaurant => {
 addMarkersToMap = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     // Add marker to the map
-    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
-    google.maps.event.addListener(marker, "click", () => {
-      window.location.href = marker.url;
-    });
+    const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.mMap);
+    marker.on("click",onClick);
+    function onClick(){
+      window.location.href=marker.options.url;
+    }
     self.markers.push(marker);
   });
 
 };
 
-function storageAvailable(type) {
-  try {
-    var storage = window[type],
-      x = "__storage_test__";
-    storage.setItem(x, x);
-    storage.removeItem(x);
-    return true;
-  } catch (e) {
-    return (
-      e instanceof DOMException &&
-      // everything except Firefox
-      (e.code === 22 ||
-        // Firefox
-        e.code === 1014 ||
-        // test name field too, because code might not be present
-        // everything except Firefox
-        e.name === "QuotaExceededError" ||
-        // Firefox
-        e.name === "NS_ERROR_DOM_QUOTA_REACHED") &&
-      // acknowledge QuotaExceededError only if there's something already stored
-      storage.length !== 0
-    );
+handleBtnClick = (event) => {
+  toggleButton(event.target);
+};
+handleBtnKeyPress = (event) => {
+  if (event.key === " " || event.key === "Enter") {
+    event.preventDefault();
+    toggleButton(event.target);
   }
-}
- document.addEventListener("DOMContentLoaded", event => {
-   if (navigator.serviceWorker) {
-     navigator.serviceWorker
-       .register("./sw.js")
-       .then(registration => console.log("SW registered", registration))
-       .catch(e => console.log("Registration failed :(", e));
-   }
- });
-
+};
+toggleButton = (element) => {
+  var pressed = (element.getAttribute("aria-pressed") === "true");
+  element.setAttribute("aria-pressed", !pressed);
+};

@@ -11,25 +11,6 @@ function urlForRestaurant(restaurant) {
   
     return `./restaurant.html?id=${restaurant.id}`;
   }
-
-  function WebpIsSupported(callback){
-    // If the browser doesn't has the method createImageBitmap, you can't display webp format
-    if(!window.createImageBitmap){
-        callback(false);
-        return;
-    }
-    var webpdata = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoCAAEAAQAcJaQAA3AA/v3AgAA=';
-    fetch(webpdata).then(function(response){
-        return response.blob();
-    }).then(function(blob){
-        createImageBitmap(blob).then(function(){
-            callback(true);
-        }, function(){
-            callback(false);
-        });
-    });
-}
-
 /**
  * Restaurant image URL
  * @param {Object} restaurant
@@ -57,3 +38,4 @@ function imageUrlForRestaurant(
     const imgFolderPath = "./img/";
     return `${imgFolderPath}${restaurant.id}-${imgWidth}w.jpg`;
   }
+  
