@@ -7,7 +7,7 @@ The tool: Mobile Web Specialist Nanodegree Program from [Udacity](https://www.ud
 
 #### Running the project
 In order to view the project in the browser:
-1. Clone and install server from here https://github.com/udacity/mws-restaurant-stage-2.
+1. Clone and install server from here https://github.com/udacity/mws-restaurant-stage-3.
 2. Run server
 3. In the project, from console run Python -m SimpleHTTPServer 8000
 
