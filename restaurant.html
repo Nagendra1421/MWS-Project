@@ -84,7 +84,24 @@
       <ul id="reviews-list"></ul>
     </section>
     <!-- End reviews -->
-
+    <div class="modal" id="reviewModal" role="form">
+      <div class="modal-content">
+        <span class="closeIcon" onclick="closePopup()">&times;</span>
+        <div class="form-review">
+          <input type="text" placeholder="Enter Your Name" id="review-name" role="textbox"/>
+          <select name="review-rating" id="review-rating" role="listbox">
+              <option role="option" value="none" disabled selected>Select Rating</option>
+              <option role="option" value="1">1</option>
+              <option role="option" value="2">2</option>
+              <option role="option" value="3">3</option>
+              <option role="option" value="4">4</option>
+              <option role="option" value="5">5</option>
+          </select>
+          <textarea name="review-comment" id="review-comment" rows="5" placeholder="Tell us what you think" role="textbox"></textarea>
+          <button type="button" class="submit-data" onclick="processData()" role="button">Submit</button>
+        </div>
+      </div>
+    </div>
    
   </main>
   <!-- End main -->
